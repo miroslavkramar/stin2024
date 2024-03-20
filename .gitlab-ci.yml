@@ -1,0 +1,48 @@
+variables:
+  MAVEN_OPTS: -Dmaven.repo.local=.m2/repository
+
+image: maven:latest
+
+stages:
+    - build
+    - test
+    - deploy
+
+cache:
+  paths:
+    - .m2/repository
+    - target
+
+build_job:
+  stage: build
+  tags:
+    - docker 
+
+  script: 
+    - echo "Maven compile started"
+    - "mvn compile"
+
+
+test_job:
+  stage: test
+  tags:
+    - docker 
+
+  script: 
+    - echo "Maven test started"
+    - "mvn test"
+  artifacts:
+    paths:
+      - build/reports/jacoco/
+    
+pages:
+  stage: deploy
+  dependencies:
+    - test_job
+  script:
+   - mkdir public
+   - mv build/reports/jacoco/test/html/* public
+  artifacts:
+    paths:
+      - public
+      
